@@ -11,12 +11,12 @@ func TestURLBuilder_Build(t *testing.T) {
 		fragment  string
 		query     map[string][]string
 		hasSuffix bool
+		isRooted  bool
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		want    string
-		wantErr bool
+		name   string
+		fields fields
+		want   string
 	}{
 		{
 			name: "just domain",
@@ -25,8 +25,7 @@ func TestURLBuilder_Build(t *testing.T) {
 				protocol: "http",
 				domain:   "example.com",
 			},
-			want:    "http://example.com",
-			wantErr: false,
+			want: "http://example.com",
 		},
 		{
 			name: "just domain + suffix",
@@ -36,8 +35,7 @@ func TestURLBuilder_Build(t *testing.T) {
 				protocol:  "http",
 				domain:    "example.com",
 			},
-			want:    "http://example.com/",
-			wantErr: false,
+			want: "http://example.com/",
 		},
 		{
 			name: "just domain + suffix + query",
@@ -50,8 +48,7 @@ func TestURLBuilder_Build(t *testing.T) {
 					"baz": {"qux"},
 				},
 			},
-			want:    "http://example.com/?baz=qux",
-			wantErr: false,
+			want: "http://example.com/?baz=qux",
 		},
 		{
 			name: "just domain + suffix + query + fragment",
@@ -65,8 +62,7 @@ func TestURLBuilder_Build(t *testing.T) {
 				},
 				fragment: "foo",
 			},
-			want:    "http://example.com/?baz=qux#foo",
-			wantErr: false,
+			want: "http://example.com/?baz=qux#foo",
 		},
 		{
 			name: "just domain + suffix + query + fragment + path",
@@ -81,8 +77,7 @@ func TestURLBuilder_Build(t *testing.T) {
 				path:     []string{"foo", "bar"},
 				fragment: "foo",
 			},
-			want:    "http://example.com/foo/bar/?baz=qux#foo",
-			wantErr: false,
+			want: "http://example.com/foo/bar/?baz=qux#foo",
 		},
 		{
 			name: "just domain + query + fragment + path",
@@ -97,8 +92,42 @@ func TestURLBuilder_Build(t *testing.T) {
 				path:     []string{"foo", "bar"},
 				fragment: "foo",
 			},
-			want:    "http://example.com/foo/bar?baz=qux#foo",
-			wantErr: false,
+			want: "http://example.com/foo/bar?baz=qux#foo",
+		},
+		{
+			name: "just domain + query + fragment + path + rooted",
+			fields: fields{
+				isRooted:  true,
+				hasSuffix: false,
+				port:      80,
+				protocol:  "http",
+				domain:    "example.com",
+				query: map[string][]string{
+					"baz": {"qux"},
+				},
+				path:     []string{"foo", "bar"},
+				fragment: "foo",
+			},
+			want: "http://example.com/foo/bar?baz=qux#foo",
+		},
+		{
+			name: "just  path",
+			fields: fields{
+				hasSuffix: false,
+				port:      80,
+				path:      []string{"foo", "bar"},
+			},
+			want: "foo/bar",
+		},
+		{
+			name: "just  path",
+			fields: fields{
+				hasSuffix: false,
+				port:      80,
+				path:      []string{"foo", "bar"},
+				isRooted:  true,
+			},
+			want: "/foo/bar",
 		},
 	}
 	for _, tt := range tests {
@@ -111,14 +140,11 @@ func TestURLBuilder_Build(t *testing.T) {
 				fragment:  tt.fields.fragment,
 				query:     tt.fields.query,
 				hasSuffix: tt.fields.hasSuffix,
+				isRooted:  tt.fields.isRooted,
 			}
-			got, err := b.Build()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("URLBuilder.Build() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			got := b.URL()
 			if got != tt.want {
-				t.Errorf("URLBuilder.Build() = %v, want %v", got, tt.want)
+				t.Errorf("URLBuilder.URL() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -13,6 +13,7 @@ type URLBuilder struct {
 	fragment  string
 	query     map[string][]string
 	hasSuffix bool
+	isRooted  bool
 }
 
 func NewURLBuilder() *URLBuilder {
@@ -28,6 +29,11 @@ func NewURLBuilder() *URLBuilder {
 
 func (b *URLBuilder) SetSuffix(has bool) *URLBuilder {
 	b.hasSuffix = has
+	return b
+}
+
+func (b *URLBuilder) SetRooted(is bool) *URLBuilder {
+	b.isRooted = is
 	return b
 }
 
@@ -82,21 +88,24 @@ func (b *URLBuilder) Copy() *URLBuilder {
 	}
 }
 
-func (b *URLBuilder) Build() (string, error) {
+func (b *URLBuilder) URL() string {
 	domain := strings.Trim(b.domain, "/")
 	protocol := strings.Trim(b.protocol, "/")
-	if domain == "" {
-		return "", fmt.Errorf("%w: domain is empty", ErrURLBuild)
+	var url string
+	if protocol != "" {
+		url += protocol + "://"
 	}
-	if protocol == "" {
-		return "", fmt.Errorf("%w: protocol is empty", ErrURLBuild)
+	if domain != "" {
+		url += domain
 	}
-	url := protocol + "://" + domain
 	if b.port != 80 {
 		url = fmt.Sprintf("%s:%d", url, b.port)
 	}
 	if len(b.path) > 0 {
-		url += "/" + strings.Join(b.path, "/")
+		if url != "" || b.isRooted {
+			url += "/"
+		}
+		url += strings.Join(b.path, "/")
 	}
 	if b.hasSuffix {
 		url += "/"
@@ -113,5 +122,5 @@ func (b *URLBuilder) Build() (string, error) {
 	if b.fragment != "" {
 		url += "#" + b.fragment
 	}
-	return url, nil
+	return url
 }
