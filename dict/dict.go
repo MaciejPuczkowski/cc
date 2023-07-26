@@ -18,6 +18,14 @@ func New[K comparable, V any]() *Dict[K, V] {
 	return &Dict[K, V]{make(map[K]V)}
 }
 
+func (d *Dict[K, V]) Clone() *Dict[K, V] {
+	d2 := New[K, V]()
+	for k, v := range d.d {
+		d2.Set(k, v)
+	}
+	return d2
+}
+
 func (d *Dict[K, V]) Set(k K, v V) {
 	d.d[k] = v
 }
@@ -26,15 +34,12 @@ func (d *Dict[K, V]) SetItem(item Item[K, V]) {
 	d.Set(item.Key, item.Value)
 }
 
+// Get returns the value, or the default value, if the key is not found.
 func (d *Dict[K, V]) Get(k K, def V) V {
 	if v, ok := d.d[k]; ok {
 		return v
 	}
 	return def
-}
-
-func (d *Dict[K, V]) GetItem(k K, def V) Item[K, V] {
-	return Item[K, V]{k, d.Get(k, def)}
 }
 
 func (d *Dict[K, V]) Delete(k K) {

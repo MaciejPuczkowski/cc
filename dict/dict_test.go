@@ -74,7 +74,29 @@ func Test_jsonify(t *testing.T) {
 
 }
 
+func Test_interfaces(t *testing.T) {
+	var _ Dicter[string, any] = New[string, any]()
+}
+
+func Test_sliced(t *testing.T) {
+	d := New[string, []string]()
+	db := Sliced[string, string](d)
+	db.Append("a", "aa")
+	if v := d.Get("a", []string{}); len(v) != 1 || v[0] != "aa" {
+		t.Errorf("d.Get(\"a\") = %v, want %v", d.Get("a", []string{}), []string{"aa"})
+	}
+	db.Append("b", "bb")
+	if v := d.Get("b", []string{}); len(v) != 1 || v[0] != "bb" {
+		t.Errorf("d.Get(\"b\") = %v, want %v", d.Get("b", []string{}), []string{"bb"})
+	}
+	db.Append("b", "bb")
+	if v := d.Get("b", []string{}); len(v)!= 2 || v[0] != "bb" || v[1] != "bb" {
+		t.Errorf("d.Get(\"b\") = %v, want %v", d.Get("b", []string{}), []string{"bb", "bb"})
+	}
+}
+
 func Test_setdefault(t *testing.T) {
 	d := New[string, []string]()
 	d.SetDefault("a", []string{})
+	// d.Get("a", []string{}) = append(d.Get("a", []string{}))
 }
