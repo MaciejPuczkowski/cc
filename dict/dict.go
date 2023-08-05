@@ -30,6 +30,11 @@ func (d *Dict[K, V]) Set(k K, v V) {
 	d.d[k] = v
 }
 
+// Has returns true if the dictionary contains the given key.
+func (d *Dict[K, V]) Has(k K) bool {
+	_, ok := d.d[k]
+	return ok
+}
 func (d *Dict[K, V]) SetItem(item Item[K, V]) {
 	d.Set(item.Key, item.Value)
 }

@@ -76,6 +76,7 @@ func Test_jsonify(t *testing.T) {
 
 func Test_interfaces(t *testing.T) {
 	var _ Dicter[string, any] = New[string, any]()
+	var _ Dicter[string, []string] = Sliced[string, string](New[string, []string]())
 }
 
 func Test_sliced(t *testing.T) {
@@ -90,7 +91,7 @@ func Test_sliced(t *testing.T) {
 		t.Errorf("d.Get(\"b\") = %v, want %v", d.Get("b", []string{}), []string{"bb"})
 	}
 	db.Append("b", "bb")
-	if v := d.Get("b", []string{}); len(v)!= 2 || v[0] != "bb" || v[1] != "bb" {
+	if v := d.Get("b", []string{}); len(v) != 2 || v[0] != "bb" || v[1] != "bb" {
 		t.Errorf("d.Get(\"b\") = %v, want %v", d.Get("b", []string{}), []string{"bb", "bb"})
 	}
 }
