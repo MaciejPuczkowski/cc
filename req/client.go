@@ -22,6 +22,9 @@ func NewClient(http HTTPDoer) *Client {
 		responseReader: NewResponseReader(),
 	}
 }
+func NewClientDefault() *Client {
+	return NewClient(http.DefaultClient)
+}
 
 // Get performs a GET request
 func (c *Client) Get(url string) ([]byte, error) {
